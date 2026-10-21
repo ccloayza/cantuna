@@ -1,0 +1,311 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Cantuña y la Puerta de la Ciudad</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Trebuchet MS',sans-serif;background:#1b1f3a;color:#fff;text-align:center;transition:background 2s;touch-action:manipulation;user-select:none;-webkit-user-select:none;padding-bottom:20px}
+h1{font-size:clamp(18px,5vw,28px);margin:10px 50px;text-shadow:3px 3px #000}
+#controles{position:fixed;top:6px;right:6px;display:flex;flex-direction:column;gap:4px;z-index:20}
+#controles button{font-size:18px;padding:6px 8px;margin:0;background:#0006;box-shadow:none}
+#cielo{height:50px;position:relative;overflow:hidden}
+#sol{width:36px;height:36px;background:#ffd23f;position:absolute;bottom:-40px;left:10px;border-radius:4px;box-shadow:0 0 20px #ffd23f;transition:all .5s}
+#escena{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 8px}
+.sprite{width:76px;height:76px;flex:none;border-radius:50%;background:radial-gradient(circle,#fff3d6 55%,#d9c08f);padding:4px;animation:salto 1s infinite alternate;box-shadow:3px 3px #000}
+.sprite.malo{background:radial-gradient(circle,#3a1f2b 55%,#120a10);animation:temblor .25s infinite}
+.sprite.habla{outline:3px solid #ffd23f}
+.sprite svg{width:100%;height:100%}
+@keyframes salto{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+#burbuja{background:#fff;color:#222;border-radius:12px;padding:8px 12px;font-size:clamp(13px,3.6vw,16px);max-width:270px;text-align:left;position:relative;box-shadow:3px 3px #000;min-height:44px}
+#burbuja.malo{background:#ffebee;border:2px solid #e53935}
+#burbuja b{display:block;font-size:12px;color:#8d6e63}
+#burbuja.malo b{color:#c62828}
+#burbuja:before{content:'';position:absolute;left:-10px;top:20px;border:6px solid transparent;border-right:8px solid #fff}
+#tablero{display:grid;grid-template-columns:repeat(15,min(28px,5.9vw));gap:2px;justify-content:center;margin:10px auto;padding:6px;border-radius:10px;border:3px solid transparent;transition:border-color .2s,background .2s;width:max-content}
+#tablero.vigila{border-color:#ff1744;background:#ff174422}
+#tablero.seguro{border-color:#00e676;background:#00e67618}
+.celda{width:min(28px,5.9vw);height:min(28px,5.9vw);border-radius:2px}
+.meta{background:#3c4475;outline:2px dashed #8fa3ff;cursor:pointer}
+#tablero.seguro .meta{animation:latido .5s infinite alternate}
+@keyframes latido{to{background:#7e57c2;outline-color:#00e676;transform:scale(1.1)}}
+.piedra{background:linear-gradient(135deg,#d9d4c7,#a39b88);outline:1px solid #5c5546;animation:pop .3s}
+.teja{background:linear-gradient(135deg,#4fa3d1,#1f5f8b);outline:1px solid #123;animation:pop .3s}
+.reja{background:repeating-linear-gradient(90deg,#111 0 3px,#3a3a3a 3px 6px),#111;outline:1px solid #000}
+.escondido{background:#1a0d24;outline:2px dashed #c77dff}
+.hueco{background:#000;outline:3px solid #ff1744;animation:brillo .5s infinite alternate}
+@keyframes brillo{to{outline-color:#ffea00}}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes temblor{0%{transform:translate(1px)}50%{transform:translate(-2px,1px)}100%{transform:translate(1px,-1px)}}
+#panel{margin:8px;font-size:clamp(15px,4vw,18px);min-height:50px;padding:0 8px}
+button{font-size:18px;padding:12px 20px;margin:6px;border:none;border-radius:8px;cursor:pointer;background:#4caf50;color:#fff;box-shadow:0 4px #2e7d32;font-family:inherit}
+button:active{transform:translateY(3px);box-shadow:none}
+.rojo{background:#e53935;box-shadow:0 4px #8e0000}
+#dialogo{display:none;background:#000c;border:3px solid #e53935;border-radius:12px;padding:16px;max-width:520px;margin:10px auto}
+/* Zona del escondite */
+#zona{display:none;flex-direction:column;align-items:center;gap:8px;margin:6px 10px}
+#ojo{font-size:clamp(17px,4.8vw,22px);font-weight:bold;padding:10px 16px;border-radius:12px;width:min(340px,90vw);box-shadow:3px 3px #000;transition:background .2s}
+#ojo.mira{background:#c62828}
+#ojo.dist{background:#2e7d32;animation:latidoOjo .5s infinite alternate}
+@keyframes latidoOjo{to{transform:scale(1.04)}}
+#barra{width:min(320px,85vw);height:12px;background:#0006;border-radius:6px;overflow:hidden;border:2px solid #fff4}
+#progreso{height:100%;width:0;background:linear-gradient(90deg,#ff9100,#ff1744);transition:width .3s}
+#cofre{width:min(240px,70vw);height:60px;background:#5a1a7a;border:4px solid #c77dff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:4px 4px #000}
+#cofre.lleno{background:#2e7d32;border-color:#ffd23f;animation:pop .4s}
+#volador{position:fixed;width:28px;height:28px;background:linear-gradient(135deg,#d9d4c7,#a39b88);border:2px solid #333;z-index:15;pointer-events:none;display:none;transition:all .6s ease-in}
+/* Relatos */
+#relato{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+#libro{background:#fdf3dc;color:#3b2a1a;border:6px solid #8d6e63;border-radius:14px;max-width:460px;width:100%;padding:18px;box-shadow:6px 6px #000;animation:pop .3s}
+#libro.malo{background:#fbe9e7;border-color:#c62828}
+#libro .ilus{font-size:46px;margin-bottom:6px}
+#libro .sprite{display:inline-block;width:80px;height:80px}
+#quien{font-weight:bold;font-size:15px;color:#8d6e63;min-height:18px}
+#libro.malo #quien{color:#c62828}
+#libro p{font-size:clamp(16px,4.4vw,20px);line-height:1.4;margin:6px 0 14px}
+#libro small{color:#8d6e63}
+</style>
+</head>
+<body>
+<div id="controles">
+  <button id="btnSonido" onclick="alternarSonido()" title="Sonido">🔊</button>
+  <button id="btnVoz" onclick="alternarVoz()" title="Voces">🗣️</button>
+</div>
+<h1>🧱 Cantuña y la Puerta de la Ciudad 🧱</h1>
+<div id="cielo"><div id="sol"></div></div>
+<div id="escena">
+  <div class="sprite" id="hablante"></div>
+  <div id="burbuja"><b>Cantuña</b><span id="dicho">¡Alli puncha! Soy Cantuña, de Saraguro. ¿Me ayudas a construir la Puerta de la Ciudad?</span></div>
+</div>
+<div id="panel"><button onclick="inicio()">📖 ¡Comenzar la historia!</button></div>
+<div id="tablero"></div>
+<div id="zona">
+  <div id="ojo" class="mira">👁️ ¡El Hacker te mira! Espera...</div>
+  <div id="barra"><div id="progreso"></div></div>
+  <div id="cofre">🟪 Cofre de Ender (vacío)</div>
+</div>
+<div id="volador"></div>
+<div id="dialogo">
+  <p style="font-size:18px">¿Qué debe hacer Cantuña?</p>
+  <button class="rojo" onclick="darClave()">Darle mi contraseña</button>
+  <button onclick="trato()">Proponer un trato astuto</button>
+</div>
+<div id="relato"><div id="libro"><div class="ilus" id="ilus"></div><div id="quien"></div><p id="textoRelato"></p><button id="btnSig">Siguiente ▶</button><br><small id="pag"></small></div></div>
+
+<script>
+/* ---------- Personajes ---------- */
+const SPRITE=`<svg viewBox="0 0 16 16" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+<rect x="5" y="0" width="6" height="2" fill="#fafafa"/>
+<rect x="6" y="0" width="1" height="1" fill="#111"/><rect x="9" y="1" width="1" height="1" fill="#111"/>
+<rect x="2" y="2" width="12" height="1" fill="#fafafa"/>
+<rect x="3" y="2" width="1" height="1" fill="#111"/><rect x="7" y="2" width="1" height="1" fill="#111"/><rect x="12" y="2" width="1" height="1" fill="#111"/>
+<rect x="4" y="3" width="8" height="1" fill="#111"/>
+<rect x="4" y="4" width="1" height="3" fill="#111"/><rect x="11" y="4" width="1" height="2" fill="#111"/>
+<rect x="3" y="6" width="1" height="6" fill="#111"/><rect x="3" y="12" width="1" height="1" fill="#e53935"/>
+<rect x="5" y="4" width="6" height="4" fill="#b97a45"/>
+<rect x="6" y="5" width="1" height="1" fill="#000"/><rect x="9" y="5" width="1" height="1" fill="#000"/>
+<rect x="7" y="7" width="2" height="1" fill="#8d5524"/>
+<rect x="4" y="8" width="8" height="5" fill="#1c1c1c"/>
+<rect x="7" y="8" width="2" height="1" fill="#fafafa"/>
+<rect x="5" y="9" width="6" height="1" fill="#2e2e2e"/>
+<rect x="4" y="12" width="8" height="1" fill="#5d4037"/>
+<rect x="5" y="12" width="1" height="1" fill="#e0e0e0"/><rect x="7" y="12" width="1" height="1" fill="#e0e0e0"/><rect x="9" y="12" width="1" height="1" fill="#e0e0e0"/>
+<rect x="3" y="11" width="1" height="1" fill="#b97a45"/><rect x="12" y="9" width="1" height="1" fill="#b97a45"/>
+<rect x="13" y="5" width="1" height="6" fill="#8d6e63"/>
+<rect x="12" y="4" width="4" height="1" fill="#9e9e9e"/><rect x="12" y="5" width="1" height="1" fill="#9e9e9e"/>
+<rect x="5" y="13" width="6" height="1" fill="#111"/>
+<rect x="5" y="14" width="2" height="1" fill="#b97a45"/><rect x="9" y="14" width="2" height="1" fill="#b97a45"/>
+<rect x="4" y="15" width="3" height="1" fill="#3e2723"/><rect x="9" y="15" width="3" height="1" fill="#3e2723"/>
+</svg>`;
+const HACKER=`<svg viewBox="0 0 16 16" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+<rect x="5" y="1" width="6" height="1" fill="#37474f"/>
+<rect x="4" y="2" width="8" height="1" fill="#37474f"/>
+<rect x="3" y="3" width="10" height="6" fill="#37474f"/>
+<rect x="5" y="4" width="6" height="4" fill="#0b0b0b"/>
+<rect x="6" y="5" width="1" height="1" fill="#ff1744"/><rect x="9" y="5" width="1" height="1" fill="#ff1744"/>
+<rect x="7" y="7" width="2" height="1" fill="#263238"/>
+<rect x="2" y="9" width="12" height="5" fill="#263238"/>
+<rect x="7" y="9" width="2" height="2" fill="#37474f"/>
+<rect x="3" y="10" width="10" height="4" fill="#546e7a"/>
+<rect x="4" y="11" width="8" height="2" fill="#00c853"/>
+<rect x="5" y="11" width="2" height="1" fill="#b9f6ca"/><rect x="8" y="12" width="3" height="1" fill="#b9f6ca"/>
+<rect x="2" y="14" width="12" height="1" fill="#90a4ae"/>
+</svg>`;
+const $=id=>document.getElementById(id);
+
+/* ---------- Voces de los personajes ---------- */
+let ctx=null,sonido=true,voz=true;
+const VOCES={
+  narrador:{pitch:1,rate:.95,nombre:'Narrador'},
+  cantuna:{pitch:1.35,rate:1.05,nombre:'Cantuña'},
+  hacker:{pitch:.3,rate:.85,nombre:'El Hacker'}
+};
+function hablar(t,quien='narrador'){
+  if(!voz||!window.speechSynthesis)return;speechSynthesis.cancel();
+  const v=VOCES[quien];const u=new SpeechSynthesisUtterance(t.replace(/[^\p{L}\p{N}\s.,¡!¿?:;-]/gu,''));
+  u.lang='es-ES';u.pitch=v.pitch;u.rate=v.rate;
+  const vs=speechSynthesis.getVoices().filter(x=>x.lang&&x.lang.startsWith('es'));
+  if(vs.length){u.voice=(quien==='hacker'&&vs.length>1)?vs[vs.length-1]:vs[0];}
+  speechSynthesis.speak(u);}
+// Lo que dice un personaje en el juego: cambia su retrato, su globo y su voz
+function decir(t,quien='cantuna',conVoz=true){
+  const h=$('hablante');h.innerHTML=quien==='hacker'?HACKER:SPRITE;h.className='sprite habla'+(quien==='hacker'?' malo':'');
+  $('burbuja').className=quien==='hacker'?'malo':'';$('burbuja').querySelector('b').textContent=VOCES[quien].nombre;$('dicho').textContent=t;
+  if(conVoz)hablar(t,quien);}
+$('hablante').innerHTML=SPRITE;
+
+/* ---------- Sonidos (generados, sin archivos) ---------- */
+function audio(){if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(ctx&&ctx.state==='suspended')ctx.resume();return ctx;}
+function tono(f,dur,tipo='square',vol=.15,delay=0,fFin=null){
+  if(!sonido||!audio())return;const t=ctx.currentTime+delay;const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=tipo;o.frequency.setValueAtTime(f,t);if(fFin)o.frequency.exponentialRampToValueAtTime(fFin,t+dur);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+dur);}
+const sfx={
+  bloque:()=>tono(300+Math.random()*250,.08,'square',.12),
+  bot:()=>tono(150,.05,'sawtooth',.05),
+  pagina:()=>{tono(660,.08,'triangle',.12);tono(880,.1,'triangle',.12,.08);},
+  hacker:()=>{for(let i=0;i<8;i++)tono(100+Math.random()*900,.07,'sawtooth',.1,i*.06);},
+  alarma:()=>{tono(900,.1,'square',.08);tono(700,.1,'square',.08,.12);},
+  calma:()=>tono(500,.15,'sine',.12,0,350),
+  ups:()=>tono(250,.25,'triangle',.15,0,150),
+  cofre:()=>{tono(523,.15,'triangle',.2);tono(659,.15,'triangle',.2,.1);tono(784,.3,'triangle',.2,.2);},
+  victoria:()=>[523,659,784,1047,784,1047].forEach((f,i)=>tono(f,.22,'square',.13,i*.15)),
+  derrota:()=>[392,330,262,196].forEach((f,i)=>tono(f,.3,'triangle',.18,i*.25)),
+  amanecer:()=>tono(220,1.2,'sine',.15,0,660)
+};
+function alternarSonido(){sonido=!sonido;$('btnSonido').textContent=sonido?'🔊':'🔇';}
+function alternarVoz(){voz=!voz;$('btnVoz').textContent=voz?'🗣️':'🤐';if(!voz&&window.speechSynthesis)speechSynthesis.cancel();}
+
+/* ---------- Relatos con diálogos ---------- */
+// Cada página: [quién habla, texto, ilustración opcional]
+function contar(paginas,alTerminar){
+  const r=$('relato');let i=0;r.style.display='flex';
+  const mostrar=()=>{const[quien,txt,ilus]=paginas[i];
+    $('ilus').innerHTML=quien==='cantuna'?`<div class="sprite">${SPRITE}</div>`:quien==='hacker'?`<div class="sprite malo">${HACKER}</div>`:(ilus||'📖');
+    $('quien').textContent=quien==='narrador'?'':VOCES[quien].nombre+' dice:';
+    $('libro').className=quien==='hacker'?'malo':'';
+    $('textoRelato').textContent=quien==='narrador'?txt:'“'+txt+'”';
+    $('pag').textContent=`${i+1} / ${paginas.length}`;
+    $('btnSig').textContent=i<paginas.length-1?'Siguiente ▶':'¡Vamos! 🎮';
+    quien==='hacker'?sfx.hacker():sfx.pagina();hablar(txt,quien);};
+  $('btnSig').onclick=()=>{i++;if(i<paginas.length)mostrar();else{r.style.display='none';if(window.speechSynthesis)speechSynthesis.cancel();alTerminar&&alTerminar();}};
+  mostrar();}
+const RELATO_INICIO=[
+  ['narrador','Hace mucho tiempo, en el gran servidor Loja Craft, vivía Cantuña, un joven constructor del pueblo de Saraguro.','🏔️'],
+  ['cantuna','¡Alli puncha, amigos! Soy Cantuña. Con mi poncho, mi sombrero y mi pico, ¡nadie construye tan rápido como yo!'],
+  ['narrador','Un día, el administrador del servidor le dio un reto enorme: construir la Puerta de la Ciudad en una sola noche. Si fallaba, perdería su cuenta para siempre.','🏰'],
+  ['cantuna','¡Una sola noche! Ayúdame tocando los bloques marcados. ¡Vamos, que el sol no espera!']];
+const RELATO_HACKER=[
+  ['narrador','La noche avanzaba y la Puerta seguía sin terminar. De pronto, en el chat apareció un jugador encapuchado, con ojos rojos y una laptop llena de código.','🌙'],
+  ['hacker','Vaya, vaya... Hola, Cantuña. Parece que estás en apuros. Mis bots pueden terminar tu Puerta antes del amanecer.'],
+  ['cantuna','¿De verdad? ¿Y qué quieres a cambio?'],
+  ['hacker','Nada del otro mundo... solo tu contraseña. Así tu cuenta será mía para siempre.']];
+const RELATO_PLAN=[
+  ['cantuna','Déjame pensarlo... Está bien, acepto. Pero con una condición: si al amanecer falta un solo bloque, ¡pierdes tú!'],
+  ['hacker','¿Un solo bloque? Mis bots nunca fallan. ¡Trato hecho!'],
+  ['cantuna','Oye, amigo, te cuento mi plan en secreto: cuando la luz esté VERDE, el Hacker está distraído. ¡Toca cualquier bloque morado y yo lo escondo en mi Cofre de Ender!'],
+  ['cantuna','Pero si la luz está ROJA, nos está mirando. ¡Ahí no toques nada! ¿Listo?']];
+const RELATO_FINAL=[
+  ['narrador','Al salir el sol, los bots terminaron su trabajo.','🌅'],
+  ['hacker','¡Listo, Cantuña! La Puerta está completa. ¡Ahora dame tu contraseña!'],
+  ['cantuna','Revisa bien, Hacker... ¡falta un bloque! El trato se cancela.'],
+  ['hacker','¡No puede ser! ¡Me engañaste! ¡Me voy de este servidor!'],
+  ['narrador','Y el Hacker se desconectó entre píxeles para nunca volver. Desde entonces, Cantuña es el Constructor Legendario de Loja Craft.','🏆'],
+  ['cantuna','Recuerda, amigo: tu contraseña es solo tuya, y pensar con calma te saca de cualquier apuro. ¡Yupaychani por ayudarme!']];
+const RELATO_PERDIO=[
+  ['hacker','¡Gracias por tu contraseña! Ahora tu cuenta es mía.'],
+  ['cantuna','¡Oh no! Nunca, nunca hay que compartir la contraseña con nadie en internet. ¡Intentémoslo otra vez y usemos la astucia!']];
+
+/* ---------- Juego ---------- */
+const forma=["000000010000000","000000111000000","000000121000000","000001111100000","101000111000101","111001111100111","1111111K1111111","111111222111111","111112222211111","111112222211111"];
+const tablero=$('tablero'),panel=$('panel'),sol=$('sol'),zona=$('zona'),cofre=$('cofre'),dialogo=$('dialogo'),ojo=$('ojo');
+let tiempo=0,reloj,bots,vigiaTO,fase='inicio';const TOTAL=64;
+let mirando=true,escondido=null,pendientes=[],totalBots=0,pausaToque=false,avisos=0;
+function dibujar(){tablero.innerHTML='';forma.forEach((f,r)=>[...f].forEach(c=>{const d=document.createElement('div');d.className='celda';
+  if(c==='1'||c==='K'){d.classList.add('meta');d.dataset.tipo=r<=1||r===3?'teja':'piedra';d.addEventListener('pointerdown',()=>tocarCelda(d));}
+  else if(c==='2')d.classList.add('reja');
+  tablero.appendChild(d);}));}
+function poner(d){d.classList.remove('meta');d.classList.add(d.dataset.tipo);}
+function moverSol(p){sol.style.left=(5+p*80)+'%';sol.style.bottom=(-40+p*50)+'px';document.body.style.background=`rgb(${27+p*100},${31+p*120},${58+p*150})`;}
+function pararTodo(){clearInterval(reloj);clearInterval(bots);clearTimeout(vigiaTO);tablero.classList.remove('vigila','seguro');}
+
+function inicio(){audio();contar(RELATO_INICIO,empezar);}
+function empezar(){audio();pararTodo();dibujar();tiempo=0;moverSol(0);zona.style.display='none';dialogo.style.display='none';fase='construir';
+  decir('¡Rápido! Toca los bloques marcados antes de que salga el sol.');
+  panel.innerHTML='☀️ Cuando el sol llegue arriba, se acaba la noche.';
+  reloj=setInterval(()=>{tiempo++;moverSol(tiempo/TOTAL*0.6);if(tiempo>TOTAL-12&&tiempo%4===0)tono(880,.05,'sine',.1);
+    if(tiempo===TOTAL/2)decir('¡Vamos bien! ¡Sigue, sigue!','cantuna');
+    if(tiempo>=TOTAL){clearInterval(reloj);fase='pausa';aparecerHacker();}},250);}
+
+/* Esconder: ¡un solo toque con luz verde! */
+function tocarCelda(d){
+  if(fase==='construir'&&d.classList.contains('meta')){poner(d);sfx.bloque();if(navigator.vibrate)navigator.vibrate(15);return;}
+  if(fase!=='esconder'||escondido||pausaToque||!d.classList.contains('meta'))return;
+  if(mirando){ // sin castigo fuerte: solo un aviso y una pausita
+    sfx.ups();pausaToque=true;setTimeout(()=>pausaToque=false,700);avisos++;
+    decir(avisos%2?'¡Oye! ¿Qué haces ahí? ¡Te estoy vigilando!':'Qué raro... siento que alguien se mueve por aquí.','hacker');
+    setTimeout(()=>{if(fase==='esconder'&&!escondido)decir('¡Casi nos ve! Espera la luz verde.','cantuna',false);},1500);
+    return;}
+  escondido=d;pendientes=pendientes.filter(x=>x!==d);
+  volarAlCofre(d);
+  d.classList.remove('meta');d.classList.add('escondido');
+  if(navigator.vibrate)navigator.vibrate(80);
+}
+function volarAlCofre(d){
+  const v=$('volador'),a=d.getBoundingClientRect(),b=cofre.getBoundingClientRect();
+  v.style.transition='none';v.style.left=a.left+'px';v.style.top=a.top+'px';v.style.display='block';v.style.transform='scale(1)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{v.style.transition='all .6s ease-in';v.style.left=(b.left+b.width/2-14)+'px';v.style.top=(b.top+b.height/2-14)+'px';v.style.transform='scale(.4) rotate(360deg)';}));
+  setTimeout(()=>{v.style.display='none';cofre.classList.add('lleno');cofre.textContent='🔒 ¡Bloque escondido!';sfx.cofre();
+    ojo.className='dist';ojo.textContent='✅ ¡Lo lograste! Espera al amanecer...';
+    decir('¡Lo tengo! Ya está en mi Cofre de Ender. ¡Shhh, que no se entere!','cantuna');},650);
+}
+function vigilar(){
+  if(escondido)return;
+  mirando=!mirando;
+  if(mirando){ojo.className='mira';ojo.textContent='👁️ ¡El Hacker te mira! Espera...';tablero.classList.add('vigila');tablero.classList.remove('seguro');sfx.alarma();}
+  else{ojo.className='dist';ojo.textContent='😴 ¡Luz verde! Toca un bloque morado';tablero.classList.add('seguro');tablero.classList.remove('vigila');sfx.calma();}
+  // la luz verde dura más que la roja, para que sea fácil
+  vigiaTO=setTimeout(vigilar,mirando?900+Math.random()*700:2600+Math.random()*900);
+}
+
+function aparecerHacker(){const f=document.querySelectorAll('.meta').length;
+  if(f===0){fase='fin';sfx.victoria();decir('¡Lo logramos juntos! ¡Terminamos la Puerta sin ayuda de nadie!');
+    panel.innerHTML='🏆 ¡Increíble! Terminaste la Puerta tú solo. ¡El Hacker ni se atrevió a aparecer!<br><button onclick="empezar()">Jugar otra vez</button>';return;}
+  decir('Uy... no nos alcanzó el tiempo.','cantuna',false);panel.innerHTML=`¡Oh no! Faltan ${f} bloques...`;
+  contar(RELATO_HACKER,()=>{dialogo.style.display='block';decir('¿Y bien, Cantuña? ¿Me das tu contraseña?','hacker');});}
+function darClave(){dialogo.style.display='none';fase='fin';sfx.derrota();
+  contar(RELATO_PERDIO,()=>{decir('¡La próxima vez no caeremos en su trampa!','cantuna',false);panel.innerHTML='😱 ¡El Hacker se robó tu cuenta!<br><button onclick="empezar()">Intentar de nuevo</button>';});}
+function trato(){dialogo.style.display='none';contar(RELATO_PLAN,iniciarEscondite);}
+function iniciarEscondite(){
+  pendientes=[...document.querySelectorAll('.meta')];
+  if(pendientes.length<10){const puestos=[...document.querySelectorAll('.piedra,.teja')].sort(()=>Math.random()-.5);
+    puestos.slice(0,10-pendientes.length).forEach(d=>{d.classList.remove('piedra','teja');d.classList.add('meta');pendientes.push(d);});}
+  pendientes.sort(()=>Math.random()-.5);totalBots=pendientes.length;
+  fase='esconder';escondido=null;mirando=true;avisos=0;pausaToque=false;
+  $('progreso').style.width='0';cofre.className='';cofre.id='cofre';cofre.textContent='🟪 Cofre de Ender (vacío)';
+  ojo.className='mira';ojo.textContent='👁️ ¡El Hacker te mira! Espera...';tablero.classList.add('vigila');
+  zona.style.display='flex';panel.innerHTML='Con luz <b style="color:#00e676">verde</b>, toca <b>un</b> bloque morado. ¡Solo uno!';
+  decir('¡Bots, a trabajar! Yo vigilo...','hacker');
+  vigiaTO=setTimeout(vigilar,1500);
+  const ritmo=Math.max(900,18000/totalBots); // bots lentos: unos 18 segundos en total
+  bots=setInterval(()=>{
+    if(pendientes.length>0){const d=pendientes.shift();poner(d);sfx.bot();}
+    const hechos=totalBots-pendientes.length;
+    $('progreso').style.width=Math.min(100,hechos/totalBots*100)+'%';moverSol(0.6+Math.min(1,hechos/totalBots)*0.4);
+    if(!escondido&&pendientes.length===3)decir('¡Rápido, quedan pocos bloques!','cantuna');
+    if(pendientes.length===0){clearInterval(bots);clearTimeout(vigiaTO);setTimeout(final,900);}
+  },ritmo);
+}
+function final(){fase='fin';tablero.classList.remove('vigila','seguro');zona.style.display='none';moverSol(1);sfx.amanecer();
+  if(escondido){escondido.classList.remove('escondido');escondido.classList.add('hueco');
+    setTimeout(()=>{sfx.victoria();contar(RELATO_FINAL,()=>{decir('¡Somos los Constructores Legendarios!','cantuna');panel.innerHTML='🏆 ¡Eres el <b>Constructor Legendario de Loja Craft</b>!<br><button onclick="empezar()">Jugar otra vez</button>';});},1200);}
+  else{sfx.derrota();decir('¡Todos los bloques están puestos! ¡Gané!','hacker');
+    panel.innerHTML='😬 Los bots terminaron antes. Consejo: apenas veas la luz verde, ¡toca un bloque morado!<br><button onclick="empezar()">Intentar de nuevo</button>';}}
+dibujar();
+if(window.speechSynthesis){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
+</script>
+</body>
+</html>
+
+</body></html>
